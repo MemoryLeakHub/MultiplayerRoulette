@@ -1,9 +1,9 @@
 import React from "react";
 import Wheel from "./Wheel";
 import Board from "./Board";
-import { Item, PlacedChip, RouletteWrapperState } from "./Global";
+import { Item, PlacedChip, RouletteWrapperState, GameData, GameStages } from "./Global";
 var classNames = require("classnames");
-
+import { io } from "socket.io-client";
 class RouletteWrapper extends React.Component {
   rouletteWheelNumbers = [
     0,
@@ -58,6 +58,7 @@ class RouletteWrapper extends React.Component {
       next: null
     }
   };
+  socket: any;
 
   constructor(props: {} | Readonly<{}>) {
     super(props);
@@ -66,6 +67,24 @@ class RouletteWrapper extends React.Component {
     this.onChipClick = this.onChipClick.bind(this);
     this.getChipClasses = this.getChipClasses.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
+    this.socket = io("http://localhost:8000");
+    this.socket.on("connect", () => {
+      console.log(this.socket.connected); // true
+    });
+    
+    this.socket.on("disconnect", () => {
+      console.log(this.socket.connected); // false
+    });
+    this.socket.on('stage-change', (data: string) => {
+      
+      var gameData = JSON.parse(data) as GameData
+      console.log(gameData)
+
+      if (gameData.stage == GameStages.ROUND_START) {
+        var nextNumber = gameData.value
+        this.setState({ number: { next: nextNumber } })
+      }
+    });
   }
 
   onCellClick(item: Item) {

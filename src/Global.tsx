@@ -35,6 +35,19 @@ export type ChipsData = {
   selectedChip: any;
   placedChips: any;
 };
+
 export type WheelNumber = {
   next: any;
 };
+
+export enum GameStages {
+  PLACE_BET,
+  ROUND_START,
+  WINNERS
+}
+export type GameData = {
+  stage: GameStages,
+  time_remaining: number;
+  value: number;
+  wins: Map<string, number>
+}

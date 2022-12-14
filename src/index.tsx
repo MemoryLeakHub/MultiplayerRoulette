@@ -9,14 +9,8 @@ const root = createRoot(rootElement);
 console.log(555);
 
 function App() {
-  const [response, setResponse] = useState("");
-
-  useEffect(() => {}, []);
-
   return (
-    <StrictMode>
       <RouletteWrapper />
-    </StrictMode>
   );
 }
 export default App;
