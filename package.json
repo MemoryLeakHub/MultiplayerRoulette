@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@mantine/core": "^5.9.4",
     "@mantine/hooks": "^5.9.4",
+    "@mui/material": "^5.11.0",
     "@tsed/socketio": "^7.8.2",
     "@types/socket.io": "^3.0.2",
     "animejs": "3.2.1",

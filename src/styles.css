@@ -160,13 +160,13 @@ body {
   transform: translate(-50%, -50%);
 }
 
- ul li {
+ ul li.board-chip {
   list-style: none;
   margin: 0 15px;
   display: block;
 }
 
-ul li div {
+ul li.board-chip div {
   position: relative; 
   display: block;
   width: 60px;
@@ -183,6 +183,10 @@ ul li div {
 
 ul li div::before {
   content: '';
+}
+
+ul li.board-chip div::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -195,34 +199,34 @@ ul li div::before {
   z-index: -1;
 }
 
- ul li div:hover::before {
+ ul li.board-chip div:hover::before {
   transform: scale(1.1);
   box-shadow: 0 0 15px #ffee10;
 }
 
-ul li div:hover {
+ul li.board-chip div:hover {
   color: #ffee10;
   box-shadow: 0 0 5px #ffee10;
   text-shadow: 0 0 5px #ffee10;
 }
- ul li div.chip_selected {
+ ul li.board-chip div.chip_selected {
   color: #ffee10;
   box-shadow: 0 0 20px #ffee10;
   text-shadow: 0 0 5px #ffee10;
 }
-div.chip-100 {
+ul li.board-chip div.chip-100 {
   background:url('assets/chip_black.png') no-repeat;
   background-size: 60px 60px;
 }
-div.chip-20 {
+ul li.board-chip div.chip-20 {
   background:url('assets/chip_blue.png') no-repeat;
   background-size: 60px 60px;
 }
-div.chip-10 {
+ul li.board-chip div.chip-10 {
   background:url('assets/chip_orange.png') no-repeat;
   background-size: 60px 60px;
 }
-div.chip-5 {
+ul li.board-chip div.chip-5 {
   background:url('assets/chip_purple.png') no-repeat;
   background-size: 60px 60px;
 }
@@ -263,4 +267,16 @@ div.chip-5-placed {
   -webkit-text-stroke: 1px blue;
   -webkit-text-fill-color: white;
   z-index:10;
+}
+.auth-user { 
+  width: 250px;
+  margin: 300px auto;
+}
+.winnersBoard { 
+  position: absolute;
+  width: 400px;
+}
+.progressBar { 
+  width:400px;
+  margin: 0 auto;
 }

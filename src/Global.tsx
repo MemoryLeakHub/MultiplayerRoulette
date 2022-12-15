@@ -30,6 +30,8 @@ export type RouletteWrapperState = {
   rouletteData: rouletteData;
   number: WheelNumber;
   chipsData: ChipsData;
+  winners: Map<string, number>,
+  stage: GameStages;
 };
 export type ChipsData = {
   selectedChip: any;
@@ -49,5 +51,6 @@ export type GameData = {
   stage: GameStages,
   time_remaining: number;
   value: number;
-  wins: Map<string, number>
+  wins: Map<string, number>,
+  history: number[]
 }

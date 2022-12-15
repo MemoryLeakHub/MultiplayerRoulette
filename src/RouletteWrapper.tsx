@@ -1,10 +1,12 @@
 import React from "react";
 import Wheel from "./Wheel";
 import Board from "./Board";
+import { List, Button, Progress } from '@mantine/core';
 import { Item, PlacedChip, RouletteWrapperState, GameData, GameStages } from "./Global";
+import { Timer } from "easytimer.js";
 var classNames = require("classnames");
 import { io } from "socket.io-client";
-class RouletteWrapper extends React.Component {
+class RouletteWrapper extends React.Component<any, any> {
   rouletteWheelNumbers = [
     0,
     32,
@@ -44,7 +46,7 @@ class RouletteWrapper extends React.Component {
     3,
     26
   ];
-
+  timer = new Timer();
   numberRef = React.createRef<HTMLInputElement>();
   state: RouletteWrapperState = {
     rouletteData: {
@@ -56,37 +58,60 @@ class RouletteWrapper extends React.Component {
     },
     number: {
       next: null
-    }
+    },
+    winners: new Map(),
+    stage: GameStages.PLACE_BET
   };
-  socket: any;
+  socketServer: any;
 
-  constructor(props: {} | Readonly<{}>) {
+  constructor(props: { username: string }) {
     super(props);
     console.log(4444);
     this.onSpinClick = this.onSpinClick.bind(this);
     this.onChipClick = this.onChipClick.bind(this);
     this.getChipClasses = this.getChipClasses.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
-    this.socket = io("http://localhost:8000");
-    this.socket.on("connect", () => {
-      console.log(this.socket.connected); // true
+
+    this.socketServer = io("http://localhost:8000");
+
+    this.socketServer.on("connect", (socket: { emit: (arg0: string, arg1: string) => void; }) => {
+      console.log("hereee2");
+      this.socketServer.emit("enter", props.username);
     });
-    
-    this.socket.on("disconnect", () => {
-      console.log(this.socket.connected); // false
-    });
-    this.socket.on('stage-change', (data: string) => {
+   
+    this.socketServer.on('stage-change', (data: string) => {
       
       var gameData = JSON.parse(data) as GameData
       console.log(gameData)
 
-      if (gameData.stage == GameStages.ROUND_START) {
-        var nextNumber = gameData.value
-        this.setState({ number: { next: nextNumber } })
-      }
+      this.setGameData(gameData)      
     });
   }
 
+  setGameData(gameData: GameData) { 
+    if (gameData.stage === GameStages.ROUND_START) {
+      var nextNumber = gameData.value
+      this.setState({ number: { next: nextNumber }, stage: gameData.stage})
+    } else if (gameData.stage === GameStages.WINNERS) {
+      if (gameData.wins.size > 0) {
+        this.setState({ winners: gameData.wins, stage: gameData.stage })
+      }
+    } else {
+      this.setState({stage: gameData.stage })
+    }
+  }
+  getStageName() {
+    var stageName = ""
+
+    if (this.state.stage === GameStages.ROUND_START) {
+     stageName = "Waiting for ball"
+    } else if (this.state.stage === GameStages.WINNERS) {
+      stageName = "Display winners"
+    } else {
+      stageName = "Place Bets"
+    }
+    return stageName
+  }
   onCellClick(item: Item) {
     //console.log("----");
     var currentChips = this.state.chipsData.placedChips;
@@ -143,16 +168,45 @@ class RouletteWrapper extends React.Component {
       this.setState({ number: { next: nextNumber } });
     }
   }
+  placeBet() { 
+    var placedChipsMap = this.state.chipsData.placedChips
+    var chips: PlacedChip[] = new Array()
+    for(let key of Array.from( placedChipsMap.keys()) ) {
+
+      var chipsPlaced = placedChipsMap.get(key) as PlacedChip
+      console.log("place chips");
+      console.log(chips);
+      console.log(chipsPlaced);
+      console.log(chips.length);
+      chips.push(chipsPlaced);
+     
+   }
+    this.socketServer.emit("place-bet", JSON.stringify(chips));
+  }
   render() {
     return (
       <div>
         <div>
+          <div className={"winnersBoard"}>
+          <List>
+            { 
+              Array.from(this.state.winners.entries()).map((entry) => {
+               
+                  const [username, sum] = entry;
+                  return (<List.Item>{username} won {sum}$</List.Item>);
+              })
+            }
+          </List>
+          </div>
           <Wheel rouletteData={this.state.rouletteData} number={this.state.number} />
           <Board
             onCellClick={this.onCellClick}
             chipsData={this.state.chipsData}
             rouletteData={this.state.rouletteData}
           />
+        </div>
+        <div>
+         {this.getStageName()}
         </div>
         <h2>Updated: {this.state.number.next}</h2>
         <input className={"number"} ref={this.numberRef} />
@@ -161,7 +215,7 @@ class RouletteWrapper extends React.Component {
         </button>
         <div className="roulette-actions">
           <ul>
-            <li>
+            <li className={"board-chip"}>
               <div
                 key={"chip_100"}
                 className={this.getChipClasses(100)}
@@ -170,7 +224,7 @@ class RouletteWrapper extends React.Component {
                 100
               </div>
             </li>
-            <li>
+            <li className={"board-chip"}>
               <span key={"chip_20"}>
                 <div
                   className={this.getChipClasses(20)}
@@ -180,7 +234,7 @@ class RouletteWrapper extends React.Component {
                 </div>
               </span>
             </li>
-            <li>
+            <li className={"board-chip"}>
               <span key={"chip_10"}>
                 <div
                   className={this.getChipClasses(10)}
@@ -190,7 +244,7 @@ class RouletteWrapper extends React.Component {
                 </div>
               </span>
             </li>
-            <li>
+            <li className={"board-chip"}>
               <span key={"chip_5"}>
                 <div
                   className={this.getChipClasses(5)}
@@ -199,6 +253,10 @@ class RouletteWrapper extends React.Component {
                   5
                 </div>
               </span>
+            </li>
+            <li>
+            <Button disabled={this.state.stage === GameStages.PLACE_BET ? false : true}
+            variant="gradient" gradient={{ from: 'orange', to: 'red' }} onClick={() => this.placeBet()} >Place Bet</Button>
             </li>
           </ul>
         </div>
