@@ -17,6 +17,7 @@ let usersData = {} as Map<string, PlacedChip[]>;
 let wins = {} as Map<string, number>;
 timer.addEventListener('secondsUpdated', function (e: any) {
   var currentSeconds = timer.getTimeValues().seconds;
+  gameData.time_remaining = currentSeconds
   if (currentSeconds == 1) {
     console.log("Place bet");
     usersData = new Map()
@@ -58,7 +59,6 @@ timer.addEventListener('secondsUpdated', function (e: any) {
     console.log("Show results")
     sendStageEvent(gameData)
   }
-  gameData.time_remaining = currentSeconds
 
 });
 

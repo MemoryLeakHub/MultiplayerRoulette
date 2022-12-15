@@ -31,7 +31,8 @@ export type RouletteWrapperState = {
   number: WheelNumber;
   chipsData: ChipsData;
   winners: Map<string, number>,
-  stage: GameStages;
+  gameData: GameDataUI,
+  username: string;
 };
 export type ChipsData = {
   selectedChip: any;
@@ -45,7 +46,12 @@ export type WheelNumber = {
 export enum GameStages {
   PLACE_BET,
   ROUND_START,
-  WINNERS
+  WINNERS,
+  NONE
+}
+export type GameDataUI = {
+  stage: GameStages,
+  time_remaining: any;
 }
 export type GameData = {
   stage: GameStages,

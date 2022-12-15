@@ -6,6 +6,8 @@ import { Item, PlacedChip, RouletteWrapperState, GameData, GameStages } from "./
 import { Timer } from "easytimer.js";
 var classNames = require("classnames");
 import { io } from "socket.io-client";
+import LinearWithValueLabel from "./ProgressBar";
+import { height } from "@mui/system";
 class RouletteWrapper extends React.Component<any, any> {
   rouletteWheelNumbers = [
     0,
@@ -60,58 +62,69 @@ class RouletteWrapper extends React.Component<any, any> {
       next: null
     },
     winners: new Map(),
-    stage: GameStages.PLACE_BET
+    gameData: {
+      time_remaining: null,
+      stage: GameStages.NONE
+    },
+    username: ""
   };
   socketServer: any;
 
   constructor(props: { username: string }) {
     super(props);
-    console.log(4444);
+
     this.onSpinClick = this.onSpinClick.bind(this);
     this.onChipClick = this.onChipClick.bind(this);
     this.getChipClasses = this.getChipClasses.bind(this);
     this.onCellClick = this.onCellClick.bind(this);
+    this.placeBet = this.placeBet.bind(this);
+    this.clearBet = this.clearBet.bind(this);
+
 
     this.socketServer = io("http://localhost:8000");
+  }
 
-    this.socketServer.on("connect", (socket: { emit: (arg0: string, arg1: string) => void; }) => {
-      console.log("hereee2");
-      this.socketServer.emit("enter", props.username);
-    });
-   
+  componentDidMount() {
+    this.socketServer.open();
     this.socketServer.on('stage-change', (data: string) => {
-      
       var gameData = JSON.parse(data) as GameData
+      console.log("stage-change stage-change stage-change")
       console.log(gameData)
 
       this.setGameData(gameData)      
     });
+    this.socketServer.on("connect", (socket: { on: (arg0: string, arg1: (data: string) => void) => void; }) => {
+      console.log("hereee2");
+      this.setState({username: this.props.username}, () => {
+        this.socketServer.emit("enter", this.state.username);
+      }); 
+    });
   }
-
+  componentWillUnmount() {
+    this.socketServer.close();
+  }
   setGameData(gameData: GameData) { 
     if (gameData.stage === GameStages.ROUND_START) {
       var nextNumber = gameData.value
-      this.setState({ number: { next: nextNumber }, stage: gameData.stage})
+      this.setState({ number: { next: nextNumber }, gameData: {stage: gameData.stage, timeRemaining: gameData.time_remaining}}, () => {
+        console.log(this.state)
+        console.log("setGameData setGameData setGameData setGameData")
+      }); 
     } else if (gameData.stage === GameStages.WINNERS) {
       if (gameData.wins.size > 0) {
-        this.setState({ winners: gameData.wins, stage: gameData.stage })
+        this.setState({ winners: gameData.wins, gameData: {stage: gameData.stage, timeRemaining: gameData.time_remaining} }, () => {
+          console.log(this.state)
+          console.log("setGameData setGameData setGameData setGameData")
+        }); 
       }
     } else {
-      this.setState({stage: gameData.stage })
+      this.setState({gameData: {stage: gameData.stage, timeRemaining: gameData.time_remaining }}, () => {
+        console.log(this.state)
+        console.log("setGameData setGameData setGameData setGameData")
+      }); 
     }
   }
-  getStageName() {
-    var stageName = ""
 
-    if (this.state.stage === GameStages.ROUND_START) {
-     stageName = "Waiting for ball"
-    } else if (this.state.stage === GameStages.WINNERS) {
-      stageName = "Display winners"
-    } else {
-      stageName = "Place Bets"
-    }
-    return stageName
-  }
   onCellClick(item: Item) {
     //console.log("----");
     var currentChips = this.state.chipsData.placedChips;
@@ -183,6 +196,14 @@ class RouletteWrapper extends React.Component<any, any> {
    }
     this.socketServer.emit("place-bet", JSON.stringify(chips));
   }
+
+  clearBet() { 
+    this.setState({
+      chipsData: {
+        placedChips: new Map()
+      }
+    });
+  }
   render() {
     return (
       <div>
@@ -205,8 +226,8 @@ class RouletteWrapper extends React.Component<any, any> {
             rouletteData={this.state.rouletteData}
           />
         </div>
-        <div>
-         {this.getStageName()}
+        <div className={"progressBar"}>
+            <LinearWithValueLabel currentTime={this.state.gameData.time_remaining} endTime={25} />
         </div>
         <h2>Updated: {this.state.number.next}</h2>
         <input className={"number"} ref={this.numberRef} />
@@ -215,6 +236,9 @@ class RouletteWrapper extends React.Component<any, any> {
         </button>
         <div className="roulette-actions">
           <ul>
+            <li>
+            <Button  variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => this.clearBet()} >Clear Bet</Button>
+            </li>
             <li className={"board-chip"}>
               <div
                 key={"chip_100"}
@@ -255,8 +279,8 @@ class RouletteWrapper extends React.Component<any, any> {
               </span>
             </li>
             <li>
-            <Button disabled={this.state.stage === GameStages.PLACE_BET ? false : true}
-            variant="gradient" gradient={{ from: 'orange', to: 'red' }} onClick={() => this.placeBet()} >Place Bet</Button>
+            <Button disabled={this.state.gameData.stage === GameStages.PLACE_BET ? false : true}
+            variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="xl" onClick={() => this.placeBet()} >Place Bet</Button>
             </li>
           </ul>
         </div>
