@@ -6,8 +6,9 @@ import { Item, PlacedChip, RouletteWrapperState, GameData, GameStages } from "./
 import { Timer } from "easytimer.js";
 var classNames = require("classnames");
 import { io } from "socket.io-client";
-import LinearWithValueLabel from "./ProgressBar";
 import { height } from "@mui/system";
+import anime from "animejs";
+import ProgressBarRound from "./ProgressBar";
 class RouletteWrapper extends React.Component<any, any> {
   rouletteWheelNumbers = [
     0,
@@ -61,15 +62,18 @@ class RouletteWrapper extends React.Component<any, any> {
     number: {
       next: null
     },
-    winners: new Map(),
-    gameData: {
-      time_remaining: null,
-      stage: GameStages.NONE
-    },
-    username: ""
+    winners: [],
+    history: [],
+    stage: GameStages.NONE,
+    username: "",
+    endTime: 0,
+    progressCountdown: 0,
+    time_remaining: 0,
   };
   socketServer: any;
+  animateProgress: any;
 
+  blackNumbers = [ 2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 28, 31, 33, 35 ];
   constructor(props: { username: string }) {
     super(props);
 
@@ -104,24 +108,23 @@ class RouletteWrapper extends React.Component<any, any> {
     this.socketServer.close();
   }
   setGameData(gameData: GameData) { 
-    if (gameData.stage === GameStages.ROUND_START) {
+    
+    if (gameData.stage === GameStages.NO_MORE_BETS) { // PLACE BET from 25 to 35
+      var endTime = 35;
       var nextNumber = gameData.value
-      this.setState({ number: { next: nextNumber }, gameData: {stage: gameData.stage, timeRemaining: gameData.time_remaining}}, () => {
-        console.log(this.state)
-        console.log("setGameData setGameData setGameData setGameData")
-      }); 
-    } else if (gameData.stage === GameStages.WINNERS) {
-      if (gameData.wins.size > 0) {
-        this.setState({ winners: gameData.wins, gameData: {stage: gameData.stage, timeRemaining: gameData.time_remaining} }, () => {
-          console.log(this.state)
-          console.log("setGameData setGameData setGameData setGameData")
-        }); 
-      }
-    } else {
-      this.setState({gameData: {stage: gameData.stage, timeRemaining: gameData.time_remaining }}, () => {
-        console.log(this.state)
-        console.log("setGameData setGameData setGameData setGameData")
-      }); 
+      this.setState({ endTime: endTime, progressCountdown: endTime - gameData.time_remaining, number: { next: nextNumber }, stage: gameData.stage, time_remaining: gameData.time_remaining}); 
+    } else if (gameData.stage === GameStages.WINNERS) { // PLACE BET from 35 to 59
+      var endTime = 59;
+      console.log("gameData.wins")
+      console.log(gameData.wins)
+      if (gameData.wins.length > 0) {
+        this.setState({ endTime: endTime, progressCountdown: endTime - gameData.time_remaining,winners: gameData.wins,stage: gameData.stage, time_remaining: gameData.time_remaining, history: gameData.history }); 
+      } else {
+        this.setState({ endTime: endTime, progressCountdown: endTime - gameData.time_remaining, stage: gameData.stage, time_remaining: gameData.time_remaining, history: gameData.history }); 
+     }
+    } else { // PLACE BET from 0 to 25
+      var endTime = 25;
+      this.setState({endTime: endTime, progressCountdown: endTime - gameData.time_remaining, stage: gameData.stage , time_remaining: gameData.time_remaining}); 
     }
   }
 
@@ -208,18 +211,35 @@ class RouletteWrapper extends React.Component<any, any> {
     return (
       <div>
         <div>
-          <div className={"winnersBoard"}>
-          <List>
-            { 
-              Array.from(this.state.winners.entries()).map((entry) => {
-               
-                  const [username, sum] = entry;
-                  return (<List.Item>{username} won {sum}$</List.Item>);
-              })
-            }
-          </List>
-          </div>
-          <Wheel rouletteData={this.state.rouletteData} number={this.state.number} />
+          <table className={"rouletteWheelWrapper"}>
+            <tr>
+            <td className={"winnersBoard"}>
+            <div className={"winnerItemHeader"} >WINNERS</div>
+              { 
+                this.state.winners.map((entry, index) => {
+                    return (<div className="winnerItem">{index+1}. {entry.username} won {entry.sum}$</div>);
+                })
+              }
+            </td>
+            <td><Wheel rouletteData={this.state.rouletteData} number={this.state.number} /></td>
+            <td>
+              <div className={"winnerHistory"}>
+              { 
+                this.state.history.map((entry, index) => {
+                  if (entry === 0) {
+                    return (<div className="green">{entry}</div>);
+                  } else if (this.blackNumbers.includes(entry)) {
+                    return (<div className="black">{entry}</div>);
+                  } else {
+                    return (<div className="red">{entry}</div>);
+                  }
+                })
+              }
+              </div>
+            </td>
+              
+            </tr>
+          </table>
           <Board
             onCellClick={this.onCellClick}
             chipsData={this.state.chipsData}
@@ -227,7 +247,7 @@ class RouletteWrapper extends React.Component<any, any> {
           />
         </div>
         <div className={"progressBar"}>
-            <LinearWithValueLabel currentTime={this.state.gameData.time_remaining} endTime={25} />
+          <ProgressBarRound stage={this.state.stage} maxDuration={this.state.endTime} currentDuration={this.state.time_remaining} />
         </div>
         <h2>Updated: {this.state.number.next}</h2>
         <input className={"number"} ref={this.numberRef} />
@@ -279,7 +299,7 @@ class RouletteWrapper extends React.Component<any, any> {
               </span>
             </li>
             <li>
-            <Button disabled={this.state.gameData.stage === GameStages.PLACE_BET ? false : true}
+            <Button disabled={this.state.stage === GameStages.PLACE_BET ? false : true}
             variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="xl" onClick={() => this.placeBet()} >Place Bet</Button>
             </li>
           </ul>

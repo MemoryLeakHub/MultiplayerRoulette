@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { GameData, GameStages, PlacedChip, ValueType} from "../src/Global";
+import { GameData, GameStages, PlacedChip, ValueType, Winner} from "../src/Global";
 import { Timer } from "easytimer.js";
 
 /** Server Handling */
@@ -14,7 +14,7 @@ var timer = new Timer();
 var users = new Map<string, string>()
 let gameData = {} as GameData;
 let usersData = {} as Map<string, PlacedChip[]>;
-let wins = {} as Map<string, number>;
+let wins = [] as Winner[];
 timer.addEventListener('secondsUpdated', function (e: any) {
   var currentSeconds = timer.getTimeValues().seconds;
   gameData.time_remaining = currentSeconds
@@ -22,20 +22,24 @@ timer.addEventListener('secondsUpdated', function (e: any) {
     console.log("Place bet");
     usersData = new Map()
     gameData.stage = GameStages.PLACE_BET
+    wins = []
     sendStageEvent(gameData)
   } else if (currentSeconds == 25) {
-    gameData.stage = GameStages.ROUND_START
+    gameData.stage = GameStages.NO_MORE_BETS
     gameData.value = getRandomNumberInt(0, 36);
     console.log("Roulette starts")
     sendStageEvent(gameData)
 
-    wins = new Map();
-   
     for(let key of Array.from( usersData.keys()) ) {
-       var username = key;
-       var chipsPlaced = usersData.get(key) as PlacedChip[]
-       var sumWon = calculateWinnings(gameData.value, chipsPlaced)
-       wins.set(username, sumWon);
+       var username = users.get(key);
+       if (username != undefined) {
+        var chipsPlaced = usersData.get(key) as PlacedChip[]
+        var sumWon = calculateWinnings(gameData.value, chipsPlaced)
+        wins.push({
+            username: username,
+            sum: sumWon
+        });
+      }
     }
 
   } else if (currentSeconds == 35) {
@@ -49,13 +53,12 @@ timer.addEventListener('secondsUpdated', function (e: any) {
     if (gameData.history.length > 10) {
       gameData.history.shift();
     }
-    gameData.wins =new Map(
-      Array
-        .from(wins)
-        .sort((a, b) => {
-          return b[1] - a[1];
-        })
-    )
+    console.log("wins2")
+    console.log(wins)
+    console.log("wins2")
+    gameData.wins = wins.sort((a,b) => b.sum - a.sum);
+    console.log("wins")
+    console.log(gameData)
     console.log("Show results")
     sendStageEvent(gameData)
   }
@@ -94,8 +97,11 @@ function getRandomNumberInt(min: number, max: number) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
 function sendStageEvent(_gameData: GameData) { 
-  io.emit('stage-change', JSON.stringify(_gameData));
+  var json = JSON.stringify(_gameData)
+  console.log(json)
+  io.emit('stage-change', json);
 }
 
 var blackNumbers = [ 2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 28, 31, 33, 35 ];

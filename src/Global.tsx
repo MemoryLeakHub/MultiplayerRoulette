@@ -30,10 +30,18 @@ export type RouletteWrapperState = {
   rouletteData: rouletteData;
   number: WheelNumber;
   chipsData: ChipsData;
-  winners: Map<string, number>,
-  gameData: GameDataUI,
+  winners: Winner[],
   username: string;
+  endTime: number;
+  progressCountdown: number;
+  time_remaining: number;
+  stage: GameStages;
+  history: number[]
 };
+export type Winner = {
+  username: string;
+  sum: number;
+}
 export type ChipsData = {
   selectedChip: any;
   placedChips: any;
@@ -45,18 +53,14 @@ export type WheelNumber = {
 
 export enum GameStages {
   PLACE_BET,
-  ROUND_START,
+  NO_MORE_BETS,
   WINNERS,
   NONE
-}
-export type GameDataUI = {
-  stage: GameStages,
-  time_remaining: any;
 }
 export type GameData = {
   stage: GameStages,
   time_remaining: number;
   value: number;
-  wins: Map<string, number>,
+  wins: Winner[],
   history: number[]
 }

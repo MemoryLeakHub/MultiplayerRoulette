@@ -273,11 +273,70 @@ div.chip-5-placed {
   width: 250px;
   margin: 300px auto;
 }
-.winnersBoard { 
-  position: absolute;
-  width: 400px;
-}
 .progressBar { 
   width:400px;
   margin: 0 auto;
+}
+.linearProgressRounds { 
+  width:400px;
+  height:40px;
+}
+.progressRoundTitle {
+  text-align:center;
+  margin:0 auto;
+  margin-top:20px;
+  font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+}
+.winnerItem { 
+  font-size: 24px;
+  font-weight: 600;
+  margin-top:20px;
+  color: #f5f5dc;
+}
+.winnerItemHeader { 
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin-top:20px;
+  color: #f5f5dc;
+}
+.rouletteWheelWrapper {
+  margin: 0 auto;
+}
+.winnerHistory { 
+  vertical-align:top;
+  width: 400px;
+}
+.winnersBoard { 
+  vertical-align:top;
+  width: 400px;
+}
+
+.winnerHistory .red {
+  text-align: center;
+  background-color: rgb(177, 6, 6);
+}
+.winnerHistory .green {
+  text-align: center;
+  background-color: rgb(42, 174, 42);
+}
+.winnerHistory .black {
+  text-align: center;
+  background-color: rgb(41, 40, 40);
+}
+.winnerHistory {
+
+}
+.winnerHistory div {
+  float:left; 
+  color:#fff;
+  font-weight: 900;
+  line-height: 40px;;
+  margin-left:20px;
+  margin-top:10px;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
 }
