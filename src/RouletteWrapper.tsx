@@ -9,46 +9,23 @@ import { io } from "socket.io-client";
 import { height } from "@mui/system";
 import anime from "animejs";
 import ProgressBarRound from "./ProgressBar";
+
+// var singleRotation = 0
+
+// var r1 = singleRotation * 0 // 0
+// var r2 = singleRotation * 2 // 19.45..
+
 class RouletteWrapper extends React.Component<any, any> {
-  rouletteWheelNumbers = [
-    0,
-    32,
-    15,
-    19,
-    4,
-    21,
-    2,
-    25,
-    17,
-    34,
-    6,
-    27,
-    13,
-    36,
-    11,
-    30,
-    8,
-    23,
-    10,
-    5,
-    24,
-    16,
-    33,
-    1,
-    20,
-    14,
-    31,
-    9,
-    22,
-    18,
-    29,
-    7,
-    28,
-    12,
-    35,
-    3,
-    26
+  
+  rouletteWheelNumbers = [ 
+    0, 32, 15, 19, 4, 21, 2, 25,
+    17, 34, 6, 27, 13, 36, 11,
+    30, 8, 23,10, 5, 24, 16, 33,
+    1, 20, 14, 31, 9, 22, 18, 29,
+    7, 28, 12, 35, 3, 26
   ];
+
+
   timer = new Timer();
   numberRef = React.createRef<HTMLInputElement>();
   state: RouletteWrapperState = {
@@ -92,7 +69,6 @@ class RouletteWrapper extends React.Component<any, any> {
     this.socketServer.open();
     this.socketServer.on('stage-change', (data: string) => {
       var gameData = JSON.parse(data) as GameData
-      console.log("stage-change stage-change stage-change")
       console.log(gameData)
 
       this.setGameData(gameData)      
@@ -108,15 +84,12 @@ class RouletteWrapper extends React.Component<any, any> {
     this.socketServer.close();
   }
   setGameData(gameData: GameData) { 
-    
     if (gameData.stage === GameStages.NO_MORE_BETS) { // PLACE BET from 25 to 35
       var endTime = 35;
       var nextNumber = gameData.value
       this.setState({ endTime: endTime, progressCountdown: endTime - gameData.time_remaining, number: { next: nextNumber }, stage: gameData.stage, time_remaining: gameData.time_remaining}); 
     } else if (gameData.stage === GameStages.WINNERS) { // PLACE BET from 35 to 59
       var endTime = 59;
-      console.log("gameData.wins")
-      console.log(gameData.wins)
       if (gameData.wins.length > 0) {
         this.setState({ endTime: endTime, progressCountdown: endTime - gameData.time_remaining,winners: gameData.wins,stage: gameData.stage, time_remaining: gameData.time_remaining, history: gameData.history }); 
       } else {
@@ -164,9 +137,8 @@ class RouletteWrapper extends React.Component<any, any> {
         }
       });
     }
-    //console.log(chip);
-    //console.log(this.state);
   }
+  
   getChipClasses(chip: number) {
     var cellClass = classNames({
       chip_selected: chip === this.state.chipsData.selectedChip,
@@ -214,7 +186,7 @@ class RouletteWrapper extends React.Component<any, any> {
           <table className={"rouletteWheelWrapper"}>
             <tr>
             <td className={"winnersBoard"}>
-            <div className={"winnerItemHeader"} >WINNERS</div>
+            <div className={"winnerItemHeader hideElementsTest"} >WINNERS</div>
               { 
                 this.state.winners.map((entry, index) => {
                     return (<div className="winnerItem">{index+1}. {entry.username} won {entry.sum}$</div>);
@@ -223,7 +195,7 @@ class RouletteWrapper extends React.Component<any, any> {
             </td>
             <td><Wheel rouletteData={this.state.rouletteData} number={this.state.number} /></td>
             <td>
-              <div className={"winnerHistory"}>
+              <div className={"winnerHistory hideElementsTest"}>
               { 
                 this.state.history.map((entry, index) => {
                   if (entry === 0) {
@@ -246,15 +218,17 @@ class RouletteWrapper extends React.Component<any, any> {
             rouletteData={this.state.rouletteData}
           />
         </div>
-        <div className={"progressBar"}>
+        <div className={"progressBar hideElementsTest"}>
           <ProgressBarRound stage={this.state.stage} maxDuration={this.state.endTime} currentDuration={this.state.time_remaining} />
         </div>
+        {/* <div>
         <h2>Updated: {this.state.number.next}</h2>
-        <input className={"number"} ref={this.numberRef} />
-        <button className={"spin"} onClick={this.onSpinClick}>
-          Spin
-        </button>
-        <div className="roulette-actions">
+          <input className={"number"} ref={this.numberRef} />
+          <button className={"spin"} onClick={this.onSpinClick}>
+            Spin
+          </button>
+        </div> */}
+        <div className="roulette-actions hideElementsTest">
           <ul>
             <li>
             <Button  variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => this.clearBet()} >Clear Bet</Button>

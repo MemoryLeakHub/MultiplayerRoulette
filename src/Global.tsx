@@ -1,3 +1,5 @@
+
+
 export enum ValueType {
   NUMBER,
   NUMBERS_1_12,
@@ -14,11 +16,15 @@ export enum ValueType {
   TRIPLE_SPLIT,
   EMPTY
 }
+
+
 export interface Item {
   type: ValueType;
   value: number;
   valueSplit: number[];
 }
+
+
 export interface PlacedChip {
   item: Item;
   sum: number;

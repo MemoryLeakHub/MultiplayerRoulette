@@ -27,7 +27,7 @@ timer.addEventListener('secondsUpdated', function (e: any) {
   } else if (currentSeconds == 25) {
     gameData.stage = GameStages.NO_MORE_BETS
     gameData.value = getRandomNumberInt(0, 36);
-    console.log("Roulette starts")
+    console.log("No More Bets")
     sendStageEvent(gameData)
 
     for(let key of Array.from( usersData.keys()) ) {
@@ -43,6 +43,7 @@ timer.addEventListener('secondsUpdated', function (e: any) {
     }
 
   } else if (currentSeconds == 35) {
+    console.log("Winners")
     gameData.stage = GameStages.WINNERS
     // sort winners desc
     if (gameData.history == undefined) {
@@ -53,32 +54,22 @@ timer.addEventListener('secondsUpdated', function (e: any) {
     if (gameData.history.length > 10) {
       gameData.history.shift();
     }
-    console.log("wins2")
-    console.log(wins)
-    console.log("wins2")
     gameData.wins = wins.sort((a,b) => b.sum - a.sum);
-    console.log("wins")
-    console.log(gameData)
-    console.log("Show results")
     sendStageEvent(gameData)
   }
 
 });
 
 io.on("connection", (socket) => {
-  console.log("connection : " + socket)
   
   socket.on('enter', (data: string) => {
-    console.log("users : " + users.size)
     users.set(socket.id, data);
-    console.log("username server: " + data)
     sendStageEvent(gameData);
   });
 
   socket.on('place-bet', (data: string) => {
     var gameData = JSON.parse(data) as PlacedChip[]
     usersData.set(socket.id, gameData)
-    console.log("username server: " + data)
   });
   socket.on("disconnect", (reason) => {
     users.delete(socket.id);
@@ -92,6 +83,7 @@ httpServer.listen(8000, () =>{
   
   timer.start({precision: 'seconds'});
 });
+
 function getRandomNumberInt(min: number, max: number) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -106,9 +98,6 @@ function sendStageEvent(_gameData: GameData) {
 
 var blackNumbers = [ 2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 28, 31, 33, 35 ];
 var redNumbers = [ 1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36 ];
-var row1Numbers = [ 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36 ];
-var row2Numbers = [ 2, 5, 8, 11, 14, 17, 20, 23, 26, 229, 32, 35 ];
-var row3Numbers = [ 1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34 ];
 
 function calculateWinnings(winningNumber: number, placedChips: PlacedChip[]) { 
   var win = 0;
@@ -140,15 +129,15 @@ function calculateWinnings(winningNumber: number, placedChips: PlacedChip[]) {
       { // if number is 19 to 36
           win += placedChipSum * 2;
       }
-      else if (placedChipType === ValueType.NUMBERS_1_12 && row1Numbers.includes(winningNumber))
+      else if (placedChipType === ValueType.NUMBERS_1_12 && (winningNumber >= 1 && winningNumber <= 12))
       { // if number is within range of row1
           win += placedChipSum * 3;
       }
-      else if (placedChipType === ValueType.NUMBERS_2_12 && row2Numbers.includes(winningNumber))
+      else if (placedChipType === ValueType.NUMBERS_2_12 && (winningNumber >= 13 && winningNumber <= 24))
       { // if number is within range of row2
           win += placedChipSum * 3;
       }
-      else if (placedChipType === ValueType.NUMBERS_3_12 && row3Numbers.includes(winningNumber))
+      else if (placedChipType === ValueType.NUMBERS_3_12 && (winningNumber >= 25 && winningNumber <= 36))
       { // if number is within range of row3
           win += placedChipSum * 3;
       }

@@ -144,8 +144,8 @@ body {
 #app table,
 #app td,
 #app th {
-  border: 1px solid #595959;
-  border-collapse: collapse;
+  /*border: 4px solid #fff700;
+  border-collapse: collapse;*/
 }
 
 
@@ -339,4 +339,8 @@ div.chip-5-placed {
   width: 40px;
   height: 40px;
   margin-bottom: 10px;
+}
+
+.hideElementsTest {
+ /* visibility: hidden;*/
 }

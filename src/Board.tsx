@@ -80,8 +80,9 @@ class Board extends React.Component<any, any> {
 
     return cellClass;
   }
+  
   getNumbersList() {
-    console.log(111);
+
     let colList: Array<Array<Item>> = [];
     var difference = 3;
 
@@ -221,7 +222,7 @@ class Board extends React.Component<any, any> {
     );
 
     return (
-      <div className="roulette-board-wrapper">
+      <div className="roulette-board-wrapper hideElementsTest">
         <div className="roulette-board">
           <div className="roulette-board-grid-numbers">
             <table>
@@ -255,7 +256,10 @@ class Board extends React.Component<any, any> {
                               cellClass={cellClass}
                               rowSpan={5}
                               colSpan={1}
-                              onCellClick={this.onCellClick} leftMin={undefined} leftMax={undefined} topMin={undefined} topMax={undefined}                            />
+                              onCellClick={this.onCellClick} 
+                              leftMin={undefined} 
+                              leftMax={undefined} 
+                              topMin={undefined} topMax={undefined}                            />
                           );
                         } else {
                           var chipKeyValue = cell.value + "";
@@ -291,19 +295,6 @@ class Board extends React.Component<any, any> {
                                 cellClass={cellClass}
                                 onCellClick={this.onCellClick} leftMin={undefined} leftMax={undefined} topMin={undefined} topMax={undefined}                              />
                             );
-                            // return (
-                            //   <td
-                            //     key={tdKey}
-                            //     className={cellClass}
-                            //     onClick={(e) => this.onCellClick(cell)}
-                            //   >
-                            //     <Chip
-                            //       key={chipKey}
-                            //       currentItemChips={currentItemChips}
-                            //       currentItem={cell}
-                            //     />
-                            //   </td>
-                            // );
                           }
                         }
                       })}
@@ -318,6 +309,8 @@ class Board extends React.Component<any, any> {
               <tbody>
                 <tr>
                   <td colSpan={2}></td>
+
+
                   <ChipComponent
                     currentItemChips={currentItemChips_1_12}
                     tdKey={"td_other_1_12"}
@@ -332,6 +325,7 @@ class Board extends React.Component<any, any> {
                     leftMin={70}
                     leftMax={140}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined}                  />
+
 
                   <td></td>
                   <ChipComponent

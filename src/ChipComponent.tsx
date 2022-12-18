@@ -60,4 +60,6 @@ function ChipComponent(props: { currentItemChips: any; tdKey: any; cellClass: an
   );
 }
 
-export default ChipComponent; //React.memo(ChipComponent);
+
+
+export default React.memo(ChipComponent);

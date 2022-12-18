@@ -21,31 +21,33 @@ let Chip = function (props: { currentItemChips: any; currentItem: any; leftMin: 
     return cellClass;
   }
 
+
   if (currentItemChips !== undefined) {
     var total = 0;
     var chipData = currentItemChips;
     const chipsImgs = [];
+    var currentChipPlaced = 0;
     while (total < chipData.sum) {
       var currentChip = 100;
-      var currentChipPlaced = 0;
-      if (chipData.sum >= 100) {
+      var totalSum = chipData.sum - total
+      if (totalSum >= 100) {
         currentChip = 100;
-        var calc = chipData.sum - (chipData.sum % currentChip);
+        var calc = totalSum - (totalSum % currentChip);
         total += calc;
         currentChipPlaced = calc / currentChip;
-      } else if (chipData.sum >= 20) {
+      } else if (totalSum >= 20) {
         currentChip = 20;
-        var calc = chipData.sum - (chipData.sum % currentChip);
+        var calc = totalSum - (totalSum % currentChip);
         total += calc;
         currentChipPlaced = calc / currentChip;
-      } else if (chipData.sum >= 10) {
+      } else if (totalSum >= 10) {
         currentChip = 10;
-        var calc = chipData.sum - (chipData.sum % currentChip);
+        var calc = totalSum - (totalSum % currentChip);
         total += calc;
         currentChipPlaced = calc / currentChip;
       } else {
         currentChip = 5;
-        var calc = chipData.sum - (chipData.sum % currentChip);
+        var calc = totalSum - (totalSum % currentChip);
         total += calc;
         currentChipPlaced = calc / currentChip;
       }

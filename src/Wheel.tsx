@@ -3,6 +3,7 @@ import React from "react";
 import { useEffect } from "react";
 import { rouletteData, WheelNumber } from "./Global";
 
+
 const Wheel = ( props : {rouletteData : rouletteData, number: WheelNumber}) : JSX.Element => {
   var totalNumbers = 37;
   var singleSpinDuration = 5000;
